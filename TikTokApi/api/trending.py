@@ -53,9 +53,8 @@ class Trending:
                 "priority_region": processed.region,
                 "language": processed.language,
             }
-            path = "api/recommend/item_list/?{}&{}".format(
-                Trending.parent._add_url_params(), urlencode(query)
-            )
+            path = f"api/recommend/item_list/?{Trending.parent._add_url_params()}&{urlencode(query)}"
+
             res = Trending.parent.get_data(path, ttwid=ttwid, **kwargs)
             for result in res.get("itemList", []):
                 yield Video(data=result)

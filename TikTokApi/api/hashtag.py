@@ -72,14 +72,13 @@ class Hashtag:
             self.parent.logger.warning("Malformed Hashtag Object")
             return {}
 
-        path = "api/challenge/detail/?{}&{}".format(
-            self.parent._add_url_params(), urlencode(query)
-        )
+        path = f"api/challenge/detail/?{self.parent._add_url_params()}&{urlencode(query)}"
+
 
         data = self.parent.get_data(path, **kwargs)
 
         if data["challengeInfo"].get("challenge") is None:
-            raise NotFoundException("Challenge {} does not exist".format(self.name))
+            raise NotFoundException(f"Challenge {self.name} does not exist")
 
         return data
 
@@ -105,15 +104,14 @@ class Hashtag:
         cursor = offset
         page_size = 30
 
-        while cursor - offset < count:
+        while cursor - cursor < count:
             query = {
                 "count": page_size,
                 "challengeID": self.id,
                 "cursor": cursor,
             }
-            path = "api/challenge/item_list/?{}&{}".format(
-                self.parent._add_url_params(), urlencode(query)
-            )
+            path = f"api/challenge/item_list/?{self.parent._add_url_params()}&{urlencode(query)}"
+
             res = self.parent.get_data(path, **kwargs)
 
             for result in res.get("itemList", []):

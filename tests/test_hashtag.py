@@ -5,10 +5,7 @@ import os
 def test_hashtag_videos():
     with TikTokApi(custom_verify_fp=os.environ.get("verifyFp", None)) as api:
         tag = api.hashtag(name="funny")
-        video_count = 0
-        for video in tag.videos(count=100):
-            video_count += 1
-
+        video_count = sum(1 for _ in tag.videos(count=100))
         assert video_count >= 100
 
 

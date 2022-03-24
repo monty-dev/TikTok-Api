@@ -87,10 +87,10 @@ class User:
 
         quoted_username = quote(self.username)
         r = requests.get(
-            "https://tiktok.com/@{}?lang=en".format(quoted_username),
+            f"https://tiktok.com/@{quoted_username}?lang=en",
             headers={
                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-                "path": "/@{}".format(quoted_username),
+                "path": f"/@{quoted_username}",
                 "Accept-Encoding": "gzip, deflate",
                 "Connection": "keep-alive",
                 "User-Agent": self.parent._user_agent,
@@ -100,14 +100,16 @@ class User:
             **User.parent._requests_extra_kwargs,
         )
 
+
         data = extract_tag_contents(r.text)
         user = json.loads(data)
 
         user_props = user["props"]["pageProps"]
         if user_props["statusCode"] == 404:
             raise NotFoundException(
-                "TikTok user with username {} does not exist".format(self.username)
+                f"TikTok user with username {self.username} does not exist"
             )
+
 
         return user_props["userInfo"]
 
@@ -148,9 +150,8 @@ class User:
                 "priority_region": processed.region,
                 "language": processed.language,
             }
-            path = "api/post/item_list/?{}&{}".format(
-                User.parent._add_url_params(), urlencode(query)
-            )
+            path = f"api/post/item_list/?{User.parent._add_url_params()}&{urlencode(query)}"
+
 
             res = User.parent.get_data(path, send_tt_params=True, **kwargs)
 
@@ -206,9 +207,8 @@ class User:
                 "priority_region": processed.region,
                 "language": processed.language,
             }
-            path = "api/favorite/item_list/?{}&{}".format(
-                User.parent._add_url_params(), urlencode(query)
-            )
+            path = f"api/favorite/item_list/?{User.parent._add_url_params()}&{urlencode(query)}"
+
 
             res = self.parent.get_data(path, **kwargs)
 
