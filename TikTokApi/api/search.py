@@ -91,9 +91,8 @@ class Search:
                 "cursor": cursor,
                 "app_language": Search.parent._language,
             }
-            path = "api/search/{}/full/?{}&{}".format(
-                obj_type, Search.parent._add_url_params(), urlencode(query)
-            )
+            path = f"api/search/{obj_type}/full/?{Search.parent._add_url_params()}&{urlencode(query)}"
+
 
             if obj_type == "user":
                 subdomain = "www"

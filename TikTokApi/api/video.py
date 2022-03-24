@@ -85,9 +85,7 @@ class Video:
         query = {
             "itemId": self.id,
         }
-        path = "api/item/detail/?{}&{}".format(
-            self.parent._add_url_params(), urlencode(query)
-        )
+        path = f"api/item/detail/?{self.parent._add_url_params()}&{urlencode(query)}"
 
         return self.parent.get_data(path, **kwargs)
 

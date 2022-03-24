@@ -156,8 +156,9 @@ class TikTokApi:
 
         if kwargs.get("generate_static_device_id", False):
             self._custom_device_id = "".join(
-                random.choice(string.digits) for num in range(19)
+                random.choice(string.digits) for _ in range(19)
             )
+
 
         if self._signer_url is None:
             self._browser = asyncio.get_event_loop().run_until_complete(
@@ -201,18 +202,18 @@ class TikTokApi:
         if self._proxy is not None:
             proxy = self._proxy
 
-        if kwargs.get("custom_verify_fp") == None:
-            if self._custom_verify_fp != None:
-                verifyFp = self._custom_verify_fp
-            else:
+        if kwargs.get("custom_verify_fp") is None:
+            if self._custom_verify_fp is None:
                 verifyFp = "verify_khr3jabg_V7ucdslq_Vrw9_4KPb_AJ1b_Ks706M8zIJTq"
+            else:
+                verifyFp = self._custom_verify_fp
         else:
             verifyFp = kwargs.get("custom_verify_fp")
 
         tt_params = None
         send_tt_params = kwargs.get("send_tt_params", False)
 
-        full_url = f"https://{subdomain}.tiktok.com/" + path
+        full_url = f"https://{subdomain}.tiktok.com/{path}"
 
         if self._signer_url is None:
             kwargs["custom_verify_fp"] = verifyFp
@@ -250,7 +251,7 @@ class TikTokApi:
             tt_params = None
 
         query = {"verifyFp": verify_fp, "device_id": device_id, "_signature": signature}
-        url = "{}&{}".format(full_url, urlencode(query))
+        url = f"{full_url}&{urlencode(query)}"
 
         h = requests.head(
             url,
@@ -284,7 +285,7 @@ class TikTokApi:
             "x-tt-params": tt_params,
         }
 
-        self.logger.debug(f"GET: %s\n\theaders: %s", url, headers)
+        self.logger.debug("GET: %s\\n\\theaders: %s", url, headers)
         r = requests.get(
             url,
             headers=headers,
@@ -351,7 +352,7 @@ class TikTokApi:
                 "undefined": "MEDIA_ERROR",
             }
             statusCode = parsed_data.get("statusCode", 0)
-            self.logger.debug(f"TikTok Returned: %s", json)
+            self.logger.debug("TikTok Returned: %s", json)
             if statusCode == 10201:
                 # Invalid Entity
                 raise NotFoundException(
@@ -360,7 +361,7 @@ class TikTokApi:
             elif statusCode == 10219:
                 # Not available in this region
                 raise NotAvailableException("Content not available for this region")
-            elif statusCode != 0 and statusCode != -1:
+            elif statusCode not in [0, -1]:
                 raise TikTokException(
                     error_codes.get(
                         statusCode, f"TikTok sent an unknown StatusCode of {statusCode}"
@@ -372,9 +373,7 @@ class TikTokApi:
             text = r.text
             self.logger.debug("TikTok response: %s", text)
             if len(text) == 0:
-                raise EmptyResponseException(
-                    "Empty response from Tiktok to " + url
-                ) from None
+                raise EmptyResponseException(f"Empty response from Tiktok to {url}") from None
             else:
                 raise InvalidJSONException("TikTok sent invalid JSON") from e
 
@@ -413,9 +412,10 @@ class TikTokApi:
         else:
             query = {"url": url, "verifyFp": verifyFp}
         data = requests.get(
-            self._signer_url + "?{}".format(urlencode(query)),
+            self._signer_url + f"?{urlencode(query)}",
             **self._requests_extra_kwargs,
         )
+
         parsed_data = data.json()
 
         return (
@@ -430,13 +430,11 @@ class TikTokApi:
         """Extracts cookies from the kwargs passed to the function for get_data"""
         device_id = kwargs.get(
             "custom_device_id",
-            "".join(random.choice(string.digits) for num in range(19)),
+            "".join(random.choice(string.digits) for _ in range(19)),
         )
+
         if kwargs.get("custom_verify_fp") is None:
-            if self._custom_verify_fp is not None:
-                verifyFp = self._custom_verify_fp
-            else:
-                verifyFp = None
+            verifyFp = None if self._custom_verify_fp is None else self._custom_verify_fp
         else:
             verifyFp = kwargs.get("custom_verify_fp")
 
@@ -447,11 +445,12 @@ class TikTokApi:
                 "csrf_session_id": kwargs.get("csrf_session_id"),
                 "tt_csrf_token": "".join(
                     random.choice(string.ascii_uppercase + string.ascii_lowercase)
-                    for i in range(16)
+                    for _ in range(16)
                 ),
                 "s_v_web_id": verifyFp,
                 "ttwid": kwargs.get("ttwid"),
             }
+
         else:
             return {
                 "tt_webid": device_id,
@@ -459,7 +458,7 @@ class TikTokApi:
                 "csrf_session_id": kwargs.get("csrf_session_id"),
                 "tt_csrf_token": "".join(
                     random.choice(string.ascii_uppercase + string.ascii_lowercase)
-                    for i in range(16)
+                    for _ in range(16)
                 ),
                 "ttwid": kwargs.get("ttwid"),
             }
@@ -492,7 +491,7 @@ class TikTokApi:
                 kwargs["url"], custom_device_id=kwargs.get("custom_device_id", None)
             )
         query = {"verifyFp": verify_fp, "_signature": signature}
-        url = "{}&{}".format(kwargs["url"], urlencode(query))
+        url = f'{kwargs["url"]}&{urlencode(query)}'
         r = requests.get(
             url,
             headers={
@@ -515,7 +514,7 @@ class TikTokApi:
     @staticmethod
     def generate_device_id():
         """Generates a valid device_id for other methods. Pass this as the custom_device_id field to download videos"""
-        return "".join([random.choice(string.digits) for num in range(19)])
+        return "".join([random.choice(string.digits) for _ in range(19)])
 
     #
     # PRIVATE METHODS
@@ -527,10 +526,7 @@ class TikTokApi:
         """
         if proxy is None and self._proxy is not None:
             proxy = self._proxy
-        if proxy is not None:
-            return {"http": proxy, "https": proxy}
-        else:
-            return None
+        return {"http": proxy, "https": proxy} if proxy is not None else None
 
     # Process the kwargs
     def _process_kwargs(self, kwargs):
@@ -538,14 +534,15 @@ class TikTokApi:
         language = kwargs.get("language", "en")
         proxy = kwargs.get("proxy", None)
 
-        if kwargs.get("custom_device_id", None) != None:
-            device_id = kwargs.get("custom_device_id")
-        else:
-            if self._custom_device_id != None:
-                device_id = self._custom_device_id
-            else:
-                device_id = "".join(random.choice(string.digits) for num in range(19))
+        if kwargs.get("custom_device_id", None) is None:
+            device_id = (
+                self._custom_device_id
+                if self._custom_device_id != None
+                else "".join(random.choice(string.digits) for _ in range(19))
+            )
 
+        else:
+            device_id = kwargs.get("custom_device_id")
         @dataclass
         class ProcessedKwargs:
             region: str

@@ -17,15 +17,15 @@ def test_user_info():
 
 def test_user_videos():
     with TikTokApi(custom_verify_fp=os.environ.get("verifyFp", None)) as api:
-        count = 0
-        for video in api.user(username=username).videos(count=100):
-            count += 1
-
+        count = sum(1 for _ in api.user(username=username).videos(count=100))
         assert count >= 100
 
-        count = 0
-        for video in api.user(user_id=user_id, sec_uid=sec_uid).videos(count=100):
-            count += 1
+        count = sum(
+            1
+            for _ in api.user(user_id=user_id, sec_uid=sec_uid).videos(
+                count=100
+            )
+        )
 
         assert count >= 100
 
@@ -34,8 +34,5 @@ def test_user_liked():
     with TikTokApi(custom_verify_fp=os.environ.get("verifyFp", None)) as api:
         user = api.user(username="public_likes")
 
-        count = 0
-        for v in user.liked():
-            count += 1
-
+        count = sum(1 for _ in user.liked())
         assert count >= 1

@@ -70,7 +70,7 @@ class Sound:
         processed = self.parent._process_kwargs(kwargs)
         kwargs["custom_device_id"] = processed.device_id
 
-        path = "node/share/music/-{}?{}".format(self.id, self.parent._add_url_params())
+        path = f"node/share/music/-{self.id}?{self.parent._add_url_params()}"
         res = self.parent.get_data(path, **kwargs)
 
         if res.get("statusCode", 200) == 10203:
@@ -92,7 +92,7 @@ class Sound:
         """
         self.__ensure_valid()
         r = requests.get(
-            "https://www.tiktok.com/music/-{}".format(self.id),
+            f"https://www.tiktok.com/music/-{self.id}",
             headers={
                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
                 "Accept-Encoding": "gzip, deflate",
@@ -103,6 +103,7 @@ class Sound:
             cookies=self.parent._get_cookies(**kwargs),
             **self.parent._requests_extra_kwargs,
         )
+
 
         data = extract_tag_contents(r.text)
         return json.loads(data)["props"]["pageProps"]["musicInfo"]
@@ -128,7 +129,7 @@ class Sound:
         cursor = offset
         page_size = 30
 
-        while cursor - offset < count:
+        while cursor - cursor < count:
             query = {
                 "secUid": "",
                 "musicID": self.id,
@@ -136,9 +137,8 @@ class Sound:
                 "shareUid": "",
                 "count": page_size,
             }
-            path = "api/music/item_list/?{}&{}".format(
-                self.parent._add_url_params(), urlencode(query)
-            )
+            path = f"api/music/item_list/?{self.parent._add_url_params()}&{urlencode(query)}"
+
 
             res = self.parent.get_data(path, send_tt_params=True, **kwargs)
 

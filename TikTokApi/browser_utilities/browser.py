@@ -39,11 +39,7 @@ class browser(BrowserInterface):
         args = kwargs.get("browser_args", [])
         options = kwargs.get("browser_options", {})
 
-        if len(args) == 0:
-            self.args = []
-        else:
-            self.args = args
-
+        self.args = [] if len(args) == 0 else args
         self.options = {
             "headless": True,
             "handle_sigint": True,
@@ -56,10 +52,13 @@ class browser(BrowserInterface):
                 server_prefix = self.proxy.split("://")[0]
                 address = self.proxy.split("@")[1]
                 self.options["proxy"] = {
-                    "server": server_prefix + "://" + address,
+                    "server": f'{server_prefix}://{address}',
                     "username": self.proxy.split("://")[1].split(":")[0],
-                    "password": self.proxy.split("://")[1].split("@")[0].split(":")[1],
+                    "password": self.proxy.split("://")[1]
+                    .split("@")[0]
+                    .split(":")[1],
                 }
+
             else:
                 self.options["proxy"] = {"server": self.proxy}
 
@@ -244,10 +243,7 @@ class browser(BrowserInterface):
         self.redirect_url = self.page.url
 
     def __format_proxy(self, proxy):
-        if proxy is not None:
-            return {"http": proxy, "https": proxy}
-        else:
-            return None
+        return {"http": proxy, "https": proxy} if proxy is not None else None
 
     def __get_js(self):
         return requests.get(
