@@ -412,9 +412,9 @@ class TikTokApi:
         else:
             query = {"url": url, "verifyFp": verifyFp}
         data = requests.get(
-            self._signer_url + f"?{urlencode(query)}",
-            **self._requests_extra_kwargs,
+            f"{self._signer_url}?{urlencode(query)}", **self._requests_extra_kwargs
         )
+
 
         parsed_data = data.json()
 

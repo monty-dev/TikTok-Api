@@ -62,7 +62,7 @@ class browser(BrowserInterface):
             else:
                 self.options["proxy"] = {"server": self.proxy}
 
-        self.options.update(options)
+        self.options |= options
 
         if self.executable_path is not None:
             self.options["executable_path"] = self.executable_path

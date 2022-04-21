@@ -24,7 +24,7 @@ def extract_tag_contents(html):
             r'>\s*window\[[\'"]SIGI_STATE[\'"]\]\s*=\s*(?P<sigi_state>{.+});',
             html,
         ):
-            return sigi_json.group(1)
+            return sigi_json[1]
         else:
             raise CaptchaException(
                 "TikTok blocks this request displaying a Captcha \nTip: Consider using a proxy or a custom_verify_fp as method parameters"
